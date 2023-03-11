@@ -1,163 +1,251 @@
-﻿char[,] tabuleiro = new char[3, 3];
-char letra;
-int linha, coluna, contador;
+﻿char[,] board = { { '1', '2', '3' }, { '4', '5', '6' }, { '7', '8', '9' } };
 
-bool InsereNaPosicao(int linha, int coluna, char letra)
-{
-    if ((linha > 3 || linha == null) || (coluna > 3 || coluna == null))
-        return false;
-    if (tabuleiro[linha, coluna] != 'X' && tabuleiro[linha, coluna] != 'O')
-    {
-        tabuleiro[linha, coluna] = letra;
-        return true;
-    }
-    return false;
-}
+int move = 1;
+char XO = 'X';
+bool win = false;
+char winner = '\0';
 
-void MostraTabuleiro()
+void PrintBoard()
 {
-    for (linha = 0; linha < 3; linha++)
+    for (int i = 0; i < 3; i++)
     {
-        for (coluna = 0; coluna < 3; coluna++)
-            Console.Write("[" + tabuleiro[linha, coluna] + "]");
+        blankLine();
+        for (int j = 0; j < 3; j++)
+        {
+            Console.Write("  " + board[i, j] + "  ");
+            if (j < 2)
+                Console.Write("|");
+        }
         Console.WriteLine();
+        if (i < 2)
+            fillLine();
     }
+    blankLine();
 }
 
-bool ExistePosicaoVazia()
+void blankLine()
 {
-    for (linha = 0; linha < 3; linha++)
+    int pipe = 0;
+    for (int i = 0; i < 15; i++)
     {
-        for (coluna = 0; coluna < 3; coluna++)
-            if (tabuleiro[linha, coluna] != 'X' && tabuleiro[linha, coluna] != 'O')
-                return true;
+        Console.Write(' ');
+        pipe++;
+        if (pipe == 5 || pipe == 10)
+            Console.Write('|');
     }
-    return false;
+    Console.WriteLine();
 }
 
-bool VerificaLinha()
+void fillLine()
 {
-    int somaX, somaO;
-
-    for (linha = 0; linha < 3; linha++)
+    int pipe = 0;
+    for (int i = 0; i < 15; i++)
     {
-        somaX = 0;
-        somaO = 0;
-        for (coluna = 0; coluna < 3; coluna++)
+        Console.Write('_');
+        pipe++;
+        if (pipe == 5 || pipe == 10)
+            Console.Write('|');
+    }
+    Console.WriteLine();
+}
+
+bool InsertPosition(int position, char XO)
+{
+    int pos = 1;
+
+    for (int line = 0; line < board.GetLength(0); line++)
+        for (int column = 0; column < board.GetLength(1); column++)
         {
-            if (tabuleiro[linha, coluna] == 'X')
-                somaX++;
-            else
-                if (tabuleiro[linha, coluna] == 'O')
-                somaO++;
+            if (position < 1 || position > 9)
+            {
+                Console.WriteLine("Posição não encontrada. Informe outra posição");
+                return false;
+            }
 
+            if (position == pos)
+                if (board[line, column] != 'X' && board[line, column] != 'O')
+                {
+                    board[line, column] = XO;
+                    return true;
+                }
+                else
+                {
+                    Console.WriteLine("Jogada inválida. Informe outra posição");
+                    return false;
+                }
+
+            pos++;
         }
-        if (somaX == 3)
-            return true;
-        else
-            if (somaO == 3)
-            return true;
-    }
     return false;
 }
 
-bool VerificaColuna()
+bool CheckLine()
 {
-    int somaX, somaO;
+    int addX, addO;
 
-    for (coluna = 0; coluna < 3; coluna++)
+    for (int line = 0; line < board.GetLength(0); line++)
     {
-        somaX = 0;
-        somaO = 0;
-        for (linha = 0; linha < 3; linha++)
+        addX = 0;
+        addO = 0;
+
+        for (int column = 0; column < board.GetLength(1); column++)
         {
-            if (tabuleiro[linha, coluna] == 'X')
-                somaX++;
+            if (board[line, column] == 'X')
+            {
+                addX++;
+                if (addX == 3)
+                {
+                    winner = 'X';
+                    return true;
+                }
+            }
             else
-                if (tabuleiro[linha, coluna] == 'O')
-                somaO++;
-
+            {
+                if (board[line, column] == 'O')
+                {
+                    addO++;
+                    if (addO == 3)
+                    {
+                        winner = 'O';
+                        return true;
+                    }
+                }
+            }
         }
-        if (somaX == 3)
-            return true;
-        else
-            if (somaO == 3)
-            return true;
     }
+
     return false;
 }
 
-bool VerificaDiagonalPrincipal()
+bool CheckColumn()
 {
-    int somaX = 0, somaO = 0;
+    int addX, addO;
 
-    for (int diagonal = 0; diagonal < 3; diagonal++)
+    for (int column = 0; column < board.GetLength(0); column++)
     {
-        if (tabuleiro[diagonal, diagonal] == 'X')
-            somaX++;
-        else
-            if (tabuleiro[diagonal, diagonal] == 'O')
-            somaO++;
+        addX = 0;
+        addO = 0;
 
+        for (int line = 0; line < board.GetLength(1); line++)
+            if (board[line, column] == 'X')
+            {
+                addX++;
+                if (addX == 3)
+                {
+                    winner = 'X';
+                    return true;
+                }
+            }
+            else
+                if (board[line, column] == 'O')
+            {
+                addO++;
+                if (addO == 3)
+                {
+                    winner = 'O';
+                    return true;
+                }
+            }
     }
-    if (somaX == 3)
-        return true;
-    else
-        if (somaO == 3)
-        return true;
     return false;
 }
 
-bool VerificaDiagonalSecundaria()
+bool CheckDiagonal()
 {
-    int somaX = 0, somaO = 0;
+    int addX, addO, diagonalSec = board.GetLength(0);
 
-    for (int diagonal = 0; diagonal < 3; diagonal++)
+    addX = 0;
+    addO = 0;
+
+    for (int diagonal = 0; diagonal < board.GetLength(0); diagonal++)
+        if (board[diagonal, diagonal] == 'X')
+            addX++;
+        else
+            if (board[diagonal, diagonal] == 'O')
+
+            addO++;
+
+    if (addX == 3)
     {
-        if (tabuleiro[diagonal, (2 - diagonal)] == 'X')
-            somaX++;
-        else
-            if (tabuleiro[diagonal, (2 - diagonal)] == 'O')
-            somaO++;
-
+        winner = 'X';
+        return true;
     }
-    if (somaX == 3)
+    if (addO == 3)
+    {
+        winner = 'O';
         return true;
-    else
-        if (somaO == 3)
+    }
+
+    addX = 0;
+    addO = 0;
+
+    for (int diagonal = 0; diagonal < board.GetLength(0); diagonal++)
+        if (board[diagonal, diagonalSec - 1 - diagonal] == 'X')
+            addX++;
+        else
+            if (board[diagonal, diagonalSec - 1 - diagonal] == 'O')
+            addO++;
+
+    if (addX == 3)
+    {
+        winner = 'X';
         return true;
+    }
+    if (addO == 3)
+    {
+        winner = 'O';
+        return true;
+    }
+
     return false;
 }
 
-bool Ganhador()
+bool CheckWinner()
 {
-    if (VerificaLinha() || VerificaColuna() || VerificaDiagonalPrincipal() || VerificaDiagonalSecundaria())
+    if (CheckLine() || CheckColumn() || CheckDiagonal())
         return true;
     else
         return false;
 }
 
-MostraTabuleiro();
+PrintBoard();
 
-letra = 'X';
-while (ExistePosicaoVazia() && !Ganhador())
+do
 {
-    Console.WriteLine("\nLetra " + letra);
+    bool emptyPosition;
     do
     {
-        Console.Write("Informe o numero da linha: ");
-        linha = int.Parse(Console.ReadLine());
-        Console.Write("Informe o numero da coluna: ");
-        coluna = int.Parse(Console.ReadLine());
-    } while (!InsereNaPosicao(linha, coluna, letra));
+        int position;
 
-    if (letra == 'X')
-        letra = 'O';
+        Console.Write($"\nJogador {XO}. Informe a posicao: ");
+        position = int.Parse(Console.ReadLine());
+        Console.WriteLine();
+
+        emptyPosition = InsertPosition(position, XO);
+
+    } while (!emptyPosition);
+
+    if (XO == 'X')
+        XO = 'O';
     else
-        letra = 'X';
+        XO = 'X';
 
-    MostraTabuleiro();
-}
+    Console.Clear();
+    PrintBoard();
 
-Console.WriteLine("\nACABOU!");
-Console.ReadLine();
+    if (move >= 5)
+        win = CheckWinner();
+
+    move++;
+} while (move <= 9 && !win);
+
+Console.Clear();
+PrintBoard();
+
+if (win)
+    Console.WriteLine("\nJOGADOR '" + winner + "' VENCEU !!");
+else
+    Console.Write("\nDEU VELHA!");
+
+Console.WriteLine("\nPressione qualquer tecla para encerrar...");
+Console.ReadKey();
